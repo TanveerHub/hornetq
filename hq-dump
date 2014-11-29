@@ -1,12 +1,50 @@
 #!/bin/sh
 # hq-dump
-# dump hq journals
 
-JBOSS_HOME=~/Desktop/Projects/Ferguson/Fsw/jboss-eap-6.1
+# Simple means of dumping hq journal files to get specifics for JMS messages.
+# An example of where this can be useful is finding the future delivery date
+# for messages that have the _HQ_SCHED_DELIVERY property set.
 
-DATA=$JBOSS_HOME/standalone/data
+# Note that this was used with the jboss-fsw-installer-6.0.0.GA-redhat-4.jar
+# distribution of Fuse Service Works.
 
-cd $JBOSS_HOME/modules/system/layers/base
+# You may need to change the jar file versions found below and should be able
+# to find them below the BASE directory.
 
-java -cp org/hornetq/main/hornetq-server-2.3.5.Final-redhat-2.jar:org/hornetq/main/hornetq-commons-2.3.5.Final-redhat-2.jar:org/hornetq/main/hornetq-journal-2.3.5.Final-redhat-2.jar:org/hornetq/main/hornetq-core-client-2.3.5.Final-redhat-2.jar:org/jboss/logging/main/jboss-logging-3.1.2.GA-redhat-1.jar:org/jboss/netty/main/netty-3.6.6.Final-redhat-1.jar:netty-3.2.6.Final.jar:hornetq-logging-2.2.13.Final.jar org.hornetq.core.persistence.impl.journal.PrintData $DATA/messagingbindings $DATA/messagingjournal
+function usage() {
+    echo "Usage: $0 [ JBOSS_HOME ]"
+}
+
+
+
+# if we did not get an argument and we cannot find an jboss env var then fail
+if test $# -ne 1 && [ -z $JBOSS_HOME ]
+then
+    usage
+    exit 1
+fi
+
+if test $# -eq 1 
+then
+    # we have an argument so we will use that for the location of JBoss
+    JB="$1"
+else
+    JB="$JBOSS_HOME"
+fi
+
+# make sure that we can find the jboss installation
+if test ! -d $JB
+then
+    echo "error: JBoss not found at $JB"
+    usage
+    exit 1
+fi
+
+DATA=$JB/standalone/data
+BASE=$JB/modules/system/layers/base
+JARS="org/hornetq/main/hornetq-server-2.3.5.Final-redhat-2.jar:org/hornetq/main/hornetq-commons-2.3.5.Final-redhat-2.jar:org/hornetq/main/hornetq-journal-2.3.5.Final-redhat-2.jar:org/hornetq/main/hornetq-core-client-2.3.5.Final-redhat-2.jar:org/jboss/logging/main/jboss-logging-3.1.2.GA-redhat-1.jar:org/jboss/netty/main/netty-3.6.6.Final-redhat-1.jar:netty-3.2.6.Final.jar:hornetq-logging-2.2.13.Final.jar"
+
+cd $BASE
+
+java -cp $JARS org.hornetq.core.persistence.impl.journal.PrintData $DATA/messagingbindings $DATA/messagingjournal
 
