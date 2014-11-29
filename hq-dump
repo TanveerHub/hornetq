@@ -1,0 +1,12 @@
+#!/bin/sh
+# hq-dump
+# dump hq journals
+
+JBOSS_HOME=~/Desktop/Projects/Ferguson/Fsw/jboss-eap-6.1
+
+DATA=$JBOSS_HOME/standalone/data
+
+cd $JBOSS_HOME/modules/system/layers/base
+
+java -cp org/hornetq/main/hornetq-server-2.3.5.Final-redhat-2.jar:org/hornetq/main/hornetq-commons-2.3.5.Final-redhat-2.jar:org/hornetq/main/hornetq-journal-2.3.5.Final-redhat-2.jar:org/hornetq/main/hornetq-core-client-2.3.5.Final-redhat-2.jar:org/jboss/logging/main/jboss-logging-3.1.2.GA-redhat-1.jar:org/jboss/netty/main/netty-3.6.6.Final-redhat-1.jar:netty-3.2.6.Final.jar:hornetq-logging-2.2.13.Final.jar org.hornetq.core.persistence.impl.journal.PrintData $DATA/messagingbindings $DATA/messagingjournal
+
