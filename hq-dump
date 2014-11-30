@@ -15,7 +15,22 @@ function usage() {
     echo "Usage: $0 [ JBOSS_HOME ]"
 }
 
+# to output all fields use this
+function outputRaw() {
+    java -cp $JARS org.hornetq.core.persistence.impl.journal.PrintData $DATA/messagingbindings $DATA/messagingjournal
+}
 
+# to output just the message id and readable delivery date use this
+function outputSched() {
+    java -cp $JARS org.hornetq.core.persistence.impl.journal.PrintData $DATA/messagingbindings $DATA/messagingjournal | sed -n  's/.*messageID=\([0-9]*\)\;.*,_HQ_SCHED_DELIVERY=\([0-9]*\),jmsx.*/\1 \2/p' | while read id hq_sched
+do
+    # on a Mac you need to convert the milliseconds time to seconds for the date conversion to work
+    A=`expr $hq_sched / 1000`
+    D=`date -r $A`
+    echo $id $D
+done
+
+}
 
 # if we did not get an argument and we cannot find an jboss env var then fail
 if test $# -ne 1 && [ -z $JBOSS_HOME ]
@@ -46,5 +61,12 @@ JARS="org/hornetq/main/hornetq-server-2.3.5.Final-redhat-2.jar:org/hornetq/main/
 
 cd $BASE
 
-java -cp $JARS org.hornetq.core.persistence.impl.journal.PrintData $DATA/messagingbindings $DATA/messagingjournal
+# to output all data do this
+echo "Raw Data"
+outputRaw
+
+# to output only some of the data do this
+echo
+echo "MessageID Delivery Date"
+outputSched
 
