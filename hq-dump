@@ -25,7 +25,11 @@ function outputSched() {
     java -cp $JARS org.hornetq.core.persistence.impl.journal.PrintData $DATA/messagingbindings $DATA/messagingjournal | sed -n  's/.*messageID=\([0-9]*\)\;.*,_HQ_SCHED_DELIVERY=\([0-9]*\),jmsx.*/\1 \2/p' | while read id hq_sched
 do
     # on a Mac you need to convert the milliseconds time to seconds for the date conversion to work
-    A=`expr $hq_sched / 1000`
+    if [ "$(uname)" == "Darwin" ]; then
+        A=`expr $hq_sched / 1000`
+    else
+        A=$hq_sched
+    fi
     D=`date -r $A`
     echo $id $D
 done
