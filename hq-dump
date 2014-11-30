@@ -11,6 +11,10 @@
 # You may need to change the jar file versions found below and should be able
 # to find them below the BASE directory.
 
+# the output of the record fields that i am interested in (message id, delivery count, date of next delivery attempt)
+# should look something like this:
+# 7254874 9 Thu Nov 27 22:42:36 EST 2014
+
 function usage() {
     echo "Usage: $0 [ JBOSS_HOME ]"
 }
@@ -22,7 +26,7 @@ function outputRaw() {
 
 # to output just the message id and readable delivery date use this
 function outputSched() {
-    java -cp $JARS org.hornetq.core.persistence.impl.journal.PrintData $DATA/messagingbindings $DATA/messagingjournal | sed -n  's/.*messageID=\([0-9]*\)\;.*,_HQ_SCHED_DELIVERY=\([0-9]*\),jmsx.*/\1 \2/p' | while read id hq_sched
+java -cp $JARS org.hornetq.core.persistence.impl.journal.PrintData $DATA/messagingbindings $DATA/messagingjournal | sed -n  's/.*messageID=\([0-9]*\)\;.*,_HQ_SCHED_DELIVERY=\([0-9]*\),jmsxdeliverycount=\([0-9]*\),.*/\1 \2 \3/p' | while read id hq_sched jmsxdeliverycount
 do
     # on a Mac you need to convert the milliseconds time to seconds for the date conversion to work
     if [ "$(uname)" == "Darwin" ]; then
@@ -31,7 +35,7 @@ do
         A=$hq_sched
     fi
     D=`date -r $A`
-    echo $id $D
+    echo $id $jmsxdeliverycount $D
 done
 
 }
